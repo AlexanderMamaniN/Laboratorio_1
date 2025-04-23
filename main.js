@@ -71,18 +71,30 @@ function postData(event) {
   event.preventDefault();
 
   try {
-    // Get form data
+    // Obtener los campos del formulario
+    const name = document.getElementById("task-name").value;
+    const description = document.getElementById("task-description").value;
+    const dueDate = document.getElementById("task-date").value;
 
-    saveTask(task);
-    form.reset();
-    const modal = document.getElementById("task-modal");
-    modal.checked = false;
+    // Crear la nueva tarea
+    const newTask = new Task(name, description, dueDate);
+
+    // Guardarla en memoria
+    saveTask(newTask);
+
+    // Limpiar formulario
+    document.getElementById("task-form").reset();
+
+    // Cerrar modal (si estás usando un checkbox modal)
+    document.getElementById("task-modal").checked = false;
+
     showNotification("Tarea añadida correctamente!");
+
   } catch (error) {
-    showNotification("Error al añadir la tarea. Inténtalo de nuevo.");
+    showNotification("Error al añadir la tarea.");
+    console.error(error);
   }
 }
-
 /**
  *
  * task actions
@@ -90,14 +102,27 @@ function postData(event) {
  * */
 
 function saveTask(task) {
-  // implementar la creación de la tarea
-  console.log(task);
+
+  let storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+  storedTasks.push(task);
+
+  localStorage.setItem("tasks", JSON.stringify(storedTasks));
 
   loadData();
 }
 
+function loadData() {
+  taskConatiner.innerHTML = "";
+
+  const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+  storedTasks.forEach(task => {
+    taskConatiner.innerHTML += Task.buildTaskCard(task);
+  });
+}
+
 function deleteTask(id) {
-  // implementar la eliminación de la tarea
 
   loadData();
 }
@@ -107,7 +132,6 @@ function deleteTask(id) {
  *
  * */
 
-// Aqui implementar la logica para la busqueda de tareas
 document.getElementById("search-input").addEventListener("input", (e) => {
   e.preventDefault();
   console.log(e.target.value);
